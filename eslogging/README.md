@@ -1,5 +1,6 @@
-#Dave Docker Elastic Stack
+#ES Loggging example using Docker
 
+**currently using ES 5.1.1 **
 
 This is my working area for running a complete Elastic stack (Elastisearch, Kibana, Logstash, Filebeat) inside docker.
 
