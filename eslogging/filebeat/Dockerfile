@@ -14,7 +14,6 @@ RUN tar zxvf ${FILENAME}
 
 WORKDIR filebeat-${VERSION}-${ARCH}
 ADD filebeat.yml filebeat.yml
-COPY wait-for-it.sh wait-for-it.sh
 
 RUN chmod 0700 wait-for-it.sh
 
