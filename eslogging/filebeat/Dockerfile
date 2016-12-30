@@ -15,6 +15,4 @@ RUN tar zxvf ${FILENAME}
 WORKDIR filebeat-${VERSION}-${ARCH}
 ADD filebeat.yml filebeat.yml
 
-RUN chmod 0700 wait-for-it.sh
-
 CMD ["./filebeat", "-e", "-c","filebeat.yml", "-d", "publish"]
