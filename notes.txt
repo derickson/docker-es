@@ -1,0 +1,138 @@
+
+
+
+  # es_master1:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_master
+  #   environment:
+  #     - node.name=es_master1
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   volumes:
+  #     - ./data/es_m1:/usr/share/elasticsearch/data
+  # es_master2:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_master
+  #   environment:
+  #     - node.name=es_master2
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   volumes:
+  #     - ./data/es_m2:/usr/share/elasticsearch/data
+  # es_master3:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_master
+  #   environment:
+  #     - node.name=es_master3
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   volumes:
+  #     - ./data/es_m3:/usr/share/elasticsearch/data
+  # es_data1:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_data
+  #   environment:
+  #     - node.name=es_data1
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   volumes:
+  #     - ./data/es_d1:/usr/share/elasticsearch/data
+  # es_data2:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_data
+  #   environment:
+  #     - node.name=es_data2
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   volumes:
+  #     - ./data/es_d2:/usr/share/elasticsearch/data
+  # es_data3:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_data
+  #   environment:
+  #     - node.name=es_data3
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   volumes:
+  #     - ./data/es_d3:/usr/share/elasticsearch/data
+  # es_client1:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_client
+  #   environment:
+  #     - node.name=es_client1
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   ports:
+  #     - 9200:9200
+  # es_client2:
+  #   extends:
+  #     file: es_common.yml
+  #     service: es_client
+  #   environment:
+  #     - node.name=es_client2
+  #     - "discovery.zen.ping.unicast.hosts=es_master1,es_master2,es_master3"
+  #   ports:
+  #     - 9201:9200
+  # kibana1:
+  #   extends:
+  #     file: es_common.yml
+  #     service: kibana
+  #   ports:
+  #     - 5601:5601
+  #   links:
+  #     - "es_client1:client"
+  # kibana2:
+  #   extends:
+  #     file: es_common.yml
+  #     service: kibana
+  #   ports:
+  #     - 5602:5601
+  #   links:
+  #     - "es_client2:client"
+    
+
+
+# #####
+# docker network create -d bridge es5_app
+# docker network create -d bridge es5_esnet
+# docker network create -d bridge es5_kibananet
+# docker network create -d bridge es5_logshipping
+
+# # ## logstash 
+# # docker build -t local_logstash logstash
+# # docker run -d --network es5_logshipping --network es5_esnet --name logstash local_logstash
+
+
+# docker run -d --name logstashprocessor -v /Users/dave/dev/github/dave-closed-examples/docker/es511/pipeline/:/usr/share/logstash/pipeline/ docker.elastic.co/logstash/logstash:5.1.1
+
+
+
+# docker build -t "local_jekyll" jekyll
+# docker run -d -w /app --name jekyll --volume "/Users/dave/dev/github/derickson.github.io:/app" -p 4000:4000 local_jekyll
+
+
+# docker build -t "local_proxy" apache-proxy
+# ## proxy with no logging
+# docker run -d -p 80:80 -v /var/log/apache2/ --link jekyll --name proxy local_proxy
+
+
+###logging side car
+# docker build -t "local_filebeat" filebeat
+# docker run -d --link logstashprocessor --name proxy_fb --volumes-from proxy --name proxy_fb local_filebeat
+
+
+
+
+
+
+
+# ###########
+
+# docker run --name echoecho -d --volumes-from proxy  --network es5_app ubuntu /bin/bash -c 'while true; do echo "Hello $(date)"; sleep 1; done'
+
+# ## echo echo 
+# docker run --name echoecho --rm --network es5_logshipping --link logstash:logstash ubuntu /bin/bash -c 'while true; do echo "Hello $(date)"; sleep 1; done'
+
+# docker run --name echoecho --rm --log-driver gelf --log-opt gelf-address=udp://logstash:12201 --log-opt gelf-compression-type=gzip --log-opt tag="echoecho" --network es5_logshipping --link logstash:logstash ubuntu /bin/bash -c 'while true; do echo "Hello $(date)"; sleep 1; done'
+
+
