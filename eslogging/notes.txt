@@ -1,5 +1,8 @@
+Ignore this file
+Scratch TXT file full of old and partially working items removed from docker-compose.yml file 
 
 
+a multi-node es environment
 
   # es_master1:
   #   extends:
