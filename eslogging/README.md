@@ -61,3 +61,11 @@ to see the web site being proxied.  You can log into kibana with
 
 You'll have to create the ```logstash-*``` index pattern
 
+## Step 4. Cleaning everything up
+
+* turn off the environement (will delete containers but not es data)
+
+```docker-compose down```
+
+* remember the ./data folder has your indexes in it, if you want to delete those
+
