@@ -55,12 +55,11 @@ services:
   ##   !!! You need to set the absolute path on your machine to the 
   ##   !!! checked out jekyll source folder
   jekyll:
-    build: jekyll
-    ports:
-      - "4000:4000"
-    volumes:
-      - /Users/dave/dev/github/derickson.github.io:/app
-    working_dir: /app
+    image: jekyll/jekyll@sha256:715a814a1010cac95bb96ef0d06b824ae0317b7b2add0674f815a0e579a86374
+    ports: 
+      - 4000:4000
+    volumes: 
+      - /Users/dave/dev/github/derickson.github.io:/srv/jekyll
 
   ## simple apache reverse proxy in order to generate simple
   ## apache formatted proxy logs
