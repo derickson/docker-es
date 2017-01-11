@@ -1,5 +1,7 @@
 #ES Loggging example using Docker
 
+![Diagram](cloudcraft - Docker-ES Logging Example.png)
+
 **currently using ES 5.1.1 **
 
 This is my working area for running a complete Elastic stack (Elastisearch, Kibana, Logstash, Filebeat) inside docker.
