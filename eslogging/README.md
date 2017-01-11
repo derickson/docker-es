@@ -1,6 +1,6 @@
 #ES Loggging example using Docker
 
-![Diagram](cloudcraft - Docker-ES Logging Example.png)
+![Diagram](diagram.png)
 
 **currently using ES 5.1.1 **
 
