@@ -57,7 +57,7 @@ services:
     links:
       - es_standalone:elasticsearch
     volumes:
-      - /Users/dave/dev/github/docker-es/eslogging/pipeline/:/usr/share/logstash/pipeline/
+      - /Users/dave/dev/github/docker-es/eslogging5/pipeline/:/usr/share/logstash/pipeline/
     environment:
       - DOCKERENV_ES_CONNECTION=elasticsearch:9200
       - DOCKERENV_ES_USER=elastic
