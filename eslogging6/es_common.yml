@@ -1,0 +1,63 @@
+version: '2'
+services:
+  elastic_template:
+    # image: docker.elastic.co/elasticsearch/elasticsearch:5.1.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.0.0-beta1
+    container_name: elasticsearch1
+    environment:
+      - discovery.zen.minimum_master_nodes=1
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+
+  es_bigboy:
+    extends: elastic_template
+    environment:
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - "node.master=true"
+      - "node.data=true"
+    mem_limit: 4096m
+
+
+  es_datamaster:
+    extends: elastic_template
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "node.master=true"
+      - "node.data=true"
+    mem_limit: 1g
+
+  es_master:
+    extends: elastic_template
+    environment:
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "node.master=true"
+      - "node.data=false"
+    mem_limit: 512m
+
+  es_data:
+    extends: elastic_template
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "node.master=false"
+      - "node.data=true"
+    mem_limit: 1g
+
+  es_client:
+    extends: elastic_template
+    environment:
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "node.master=false"
+      - "node.data=false"
+    mem_limit: 512m
+
+

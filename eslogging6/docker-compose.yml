@@ -1,0 +1,90 @@
+version: '2'
+services:
+
+  ## Elasticsearch cluster (standalone)
+  ## persists data across container destruction in the ./data folder
+  ## make sure to set the docker host's (or docker-machine) vm.max_map_count
+  ## > docker-machine ssh default
+  ## > sudo vi /var/lib/boot2docker/profile
+  ## > # Add this line into the profile file
+  ## > sysctl -w vm.max_map_count=262144
+  es_standalone:
+    extends:
+      file: es_common.yml
+      service: es_datamaster
+    environment:
+      - node.name=es_standalone
+      - discovery.zen.minimum_master_nodes=1
+    volumes:
+      - ./data/es_s1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  # Kibana instance pointing at our standalone ES instance
+  kibana1:
+    image: docker.elastic.co/kibana/kibana:6.0.0-beta1
+    ports:
+      - 5601:5601
+    links:
+      - "es_standalone:client"
+    environment:
+      - SERVER_PORT=5601
+      - SERVER_HOST="0"
+      - SERVER_NAME="dockermachine"
+      - ELASTICSEARCH_URL=http://client:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+      - xpack.security.enabled=false
+
+
+
+  # ## the logstash instance
+  # ##   !!! You need to include absolute path to pipeline folder
+  logstashprocessor:
+    image: docker.elastic.co/logstash/logstash:6.0.0-beta1
+    links:
+      - es_standalone:elasticsearch
+    volumes:
+      - /Users/dave/dev/github/docker-es/eslogging/pipeline/:/usr/share/logstash/pipeline/
+    environment:
+      - DOCKERENV_ES_CONNECTION=elasticsearch:9200
+      - DOCKERENV_ES_USER=elastic
+      - DOCKERENV_ES_PASSWORD=changeme
+
+  # ## a jekyll web server, you can git clone a local copy of my dev blog
+  # ## > git clone https://github.com/derickson/derickson.github.io.git
+  # ## if you need something to host.
+  # ##   !!! You need to set the absolute path on your machine to the 
+  # ##   !!! checked out jekyll source folder
+  jekyll:
+    image: jekyll/jekyll@sha256:715a814a1010cac95bb96ef0d06b824ae0317b7b2add0674f815a0e579a86374
+    ports: 
+      - 4000:4000
+    volumes: 
+      - /Users/dave/dev/github/derickson.github.io:/srv/jekyll
+
+  # ## simple apache reverse proxy in order to generate simple
+  # ## apache formatted proxy logs
+  proxy:
+    build: apache-proxy
+    ports:
+      - 80:80
+    volumes:
+      - /var/log/apache2/
+    links:
+      - jekyll
+    environment:
+      - DOCKERENV_PROXY_SITE=jekyll:4000
+
+  # ## filebeat sidecar log shipper
+  proxy_fb:
+    build: filebeat
+    links:
+      - logstashprocessor
+    volumes_from:
+      - proxy:ro
+    environment:
+      - DOCKERENV_FB_PATH_TO_LOG=/var/log/apache2/access.log
+      - DOCKERENV_LOGSTASH_CONN=logstashprocessor:5044
+
+
