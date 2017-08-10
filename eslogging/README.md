@@ -20,13 +20,11 @@ I run Docker on my Macintosh laptop using Docker Toolkit.  I have not swithced o
 * install VirtualBox
 * install Docker Toolkit
 * Expand the default VM's memory to 8 GB of RAM
-* edit the default VM's vm.max_map_count setting 
+* edit the default VM's vm.max_map_count setting (see [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/6.0/docker.html#docker-cli-run-prod-mode) for tips on how to do this for different types of docker installs)
 
 ```
 docker-machine ssh default
-sudo vi /var/lib/boot2docker/profile
-# Add this line into the profile file
-sysctl -w vm.max_map_count=262144
+sudo sysctl -w vm.max_map_count=262144
 ```
 
 * reboot the default docker-machine ```docker-machine restart```
@@ -56,7 +54,7 @@ This will likely have to pull lots of images, etc so be prepared for a big downl
 
 Now you can point your web browser to 
 
-[http://dockermacine/](http://dockermacine/)
+[http://dockermachine/](http://dockermachine/)
 
 to see the web site being proxied.  You can log into kibana with
 
