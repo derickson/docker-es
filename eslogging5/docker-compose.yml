@@ -20,9 +20,9 @@ services:
     ports:
       - 9200:9200
 
-  ## Kibana instance pointing at our standalone ES instance
+  # Kibana instance pointing at our standalone ES instance
   kibana1:
-    image: docker.elastic.co/kibana/kibana:5.1.1
+    image: docker.elastic.co/kibana/kibana:5.5.1
     ports:
       - 5601:5601
     links:
@@ -35,11 +35,25 @@ services:
       - ELASTICSEARCH_USERNAME=elastic
       - ELASTICSEARCH_PASSWORD=changeme
 
+  # kibana2:
+  #   build: kibanacustom
+  #   ports:
+  #     - 5601:5601
+  #   links:
+  #     - "es_standalone:client"
+  #   environment:
+  #     - SERVER_PORT=5601
+  #     - SERVER_HOST="0"
+  #     - SERVER_NAME="dockermachine"
+  #     - ELASTICSEARCH_URL=http://client:9200
+  #     - ELASTICSEARCH_USERNAME=elastic
+  #     - ELASTICSEARCH_PASSWORD=changeme
+
 
   ## the logstash instance
   ##   !!! You need to include absolute path to pipeline folder
   logstashprocessor:
-    image: docker.elastic.co/logstash/logstash:5.1.1
+    image: docker.elastic.co/logstash/logstash:5.5.1
     links:
       - es_standalone:elasticsearch
     volumes:

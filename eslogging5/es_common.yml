@@ -1,7 +1,7 @@
 version: '2'
 services:
   elastic_template:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.1.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.5.1
     environment:
       - discovery.zen.minimum_master_nodes=2
       - cluster.name=docker-cluster
