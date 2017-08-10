@@ -54,7 +54,7 @@ This will likely have to pull lots of images, etc so be prepared for a big downl
 
 Now you can point your web browser to 
 
-[http://dockermacine/](http://dockermacine/)
+[http://dockermachine/](http://dockermachine/)
 
 to see the web site being proxied.  You can log into kibana with
 
