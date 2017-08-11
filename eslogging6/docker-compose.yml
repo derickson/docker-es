@@ -52,16 +52,19 @@ services:
       - DOCKERENV_ES_PASSWORD=changeme
 
   # ## a jekyll web server, you can git clone a local copy of my dev blog
-  # ## > git clone https://github.com/derickson/derickson.github.io.git
+  # ## > git clone https://github.com/derickson/jekyllexample.git
   # ## if you need something to host.
   # ##   !!! You need to set the absolute path on your machine to the 
   # ##   !!! checked out jekyll source folder
   jekyll:
-    image: jekyll/jekyll@sha256:715a814a1010cac95bb96ef0d06b824ae0317b7b2add0674f815a0e579a86374
+    # image: jekyll/jekyll@sha256:715a814a1010cac95bb96ef0d06b824ae0317b7b2add0674f815a0e579a86374
+    image: jekyll/jekyll:3.5
+    command: jekyll serve
     ports: 
       - 4000:4000
     volumes: 
-      - /Users/dave/dev/github/derickson.github.io:/srv/jekyll
+      - /Users/dave/dev/github/jekyllexample:/srv/jekyll
+    
 
   # ## simple apache reverse proxy in order to generate simple
   # ## apache formatted proxy logs

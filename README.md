@@ -2,7 +2,7 @@
 
 ![Diagram](diagram.png)
 
-**currently using ES 5.1.1 **
+**currently using either ES 6.0 - beta1 / ES 5.5**
 
 This is my working area for running a complete Elastic stack (Elastisearch, Kibana, Logstash, Filebeat) inside docker.
 
@@ -40,7 +40,7 @@ sudo sysctl -w vm.max_map_count=262144
 
 * in a separate folder clone my personal blog (this is the example website being proxied to generate standard apache logs
 
-```> git clone https://github.com/derickson/derickson.github.io.git```
+```> git clone https://github.com/derickson/jekyllexample.git```
 
 * edit the docker compose file with the following local edits (mostly marked in comments with ```!!!```
 	* absolute path to logstash pipeline folder
