@@ -1,0 +1,124 @@
+version: '2'
+services:
+
+  # ## Elasticsearch cluster (standalone)
+  # ## persists data across container destruction in the ./data folder
+  # ## make sure to set the docker host's (or docker-machine) vm.max_map_count
+  # ## > docker-machine ssh default
+  # ## > sudo vi /var/lib/boot2docker/profile
+  # ## > # Add this line into the profile file
+  # ## > sysctl -w vm.max_map_count=262144
+  es_standalone:
+    extends:
+      file: es_common.yml
+      service: es_datamaster
+    environment:
+      - node.name=es_standalone
+      - discovery.zen.minimum_master_nodes=1
+      - xpack.monitoring.enabled=false
+    volumes:
+      - ${PWD}/data/es_s1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+
+  # # Kibana instance pointing at our standalone ES instance
+  kibana1:
+    # build: ./kibanacustom/
+    image: docker.elastic.co/kibana/kibana:5.5.1
+    ports:
+      - 5601:5601
+    links:
+      - "es_standalone:client"
+    volumes:
+      - ${PWD}/kibana-config:/usr/share/kibana/config
+    environment:
+      - SERVER_PORT=5601
+      - SERVER_HOST="0"
+      - SERVER_NAME="dockermachine"
+      - ELASTICSEARCH_URL=http://client:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+
+## based on https://github.com/UniconLabs/dockerized-idp-testbed
+
+  httpd-proxy:
+    build: ./httpd-proxy/
+    ports:
+     - "80:80"
+     - "443:443"
+    # links:
+     # - node
+    volumes:
+      - ${PWD}/httpd.conf:/etc/httpd/conf.d/httpd.conf
+      - ${PWD}/index.html:/var/www/html/index.html
+
+
+  node:
+    image: "node:4"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ${PWD}/app:/usr/src/app
+    expose:
+      - 8080
+    links:
+     - kibana1:kibana
+    ports:
+      - "8080:8080"
+    command: node /usr/src/app/index.js
+
+
+
+      ## https://github.com/dsmk/docker-shibboleth-idp
+      ##  docker run -dP --name="idp-test" -v ~/docker/shib-config:/external-mount jtgasper3/shibboleth-idp 
+          # docker exec -it esproxy_idp-test_1 reset-idp.sh
+          # Installation Directory: [/opt/shibboleth-idp]
+          # Hostname: [af98b1d02bc5.localdomain]
+          # dockermachine
+          # SAML EntityID: [https://dockermachine/idp/shibboleth]
+          # TLS Private Key Password: shib
+          # Cookie Encryption Key Password: shib2
+
+          # rm -rf derickson-shib/*
+          # docker run -it -v $(PWD)/derickson-shib:/ext-mount --rm unicon/shibboleth-idp init-idp.sh
+          # mv credentials over to shib-credentials
+          # cp httpd-proxy/etc-httpd/ssl/domain.* shib-credentials/.
+          # cd shib-credentials
+          # openssl pkcs12 -inkey domain.key -in domain.crt -export -out idp-browser.p12
+          # ## browser 123
+  idp-test:
+    build: derickson-shib
+    ports:
+      - "4443:4443"
+      - "8443:8443"
+    volumes:
+      - ${PWD}/shib-credentials:/opt/shibboleth-idp/credentials
+    environment:
+      - JETTY_BROWSER_SSL_KEYSTORE_PASSWORD=browser123
+      - JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=shib
+      - JETTY_MAX_HEAP=2048m
+      - idp.loglevel.idp=ALL
+      - idp.loglevel.opensaml=ALL
+      - idp.loglevel.ldap=ALL
+    depends_on: 
+     - ldap
+
+  ldap:
+    build: derickson-ldap
+    ports:
+      - "389:389"
+
+
+
+
+
+### ********** saved things below this line *************** ########
+
+
+
+## browser keystore password: browser123
+## ## in credentials folder creating self signed stuff using the above browser keystore password
+# openssl genrsa -aes128 -out jetty.key
+# openssl req -new -x509 -newkey rsa:2048 -sha256 -key jetty.key -out jetty.crt
+# openssl pkcs12 -inkey jetty.key -in jetty.crt -export -out idp-browser.p12
+

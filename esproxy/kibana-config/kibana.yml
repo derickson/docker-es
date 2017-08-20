@@ -1,0 +1,5 @@
+server.basePath: /kibana
+
+elasticsearch.requestHeadersWhitelist: [ es-security-runas-user, authorization ]
+xpack.monitoring.elasticsearch.requestHeadersWhitelist: [ es-security-runas-user, authorization ]
+xpack.monitoring.enabled: false

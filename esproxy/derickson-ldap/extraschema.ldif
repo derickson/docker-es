@@ -1,0 +1,20 @@
+dn: cn=schema
+changetype: modify
+add: attributeTypes
+attributeTypes: ( securityTag
+  NAME 'securityTag'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  DESC 'Describes the ID of a stack overflow question.'
+  X-ORIGIN 'StackOverflow question.' )
+
+dn: cn=schema
+changetype: modify
+add: objectClasses
+objectClasses: ( securityTags
+  NAME 'securityTags'
+  DESC 'tags for data access'
+  SUP top
+  AUXILIARY
+  MAY ( securityTag ) )
+
+

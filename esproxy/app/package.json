@@ -1,0 +1,24 @@
+{
+  "name": "proxy-elastic",
+  "version": "0.0.1",
+  "description": "a nodejs rest reverse proxy for my stuff",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "4.13.3",
+    "passport": "^0.2.2",
+    "passport-http": "0.3.0",
+    "passport-saml": "^0.15.0",
+    "passport-strategy": "1.0.0"
+  },
+  "engines": {
+    "node": "0.12.7"
+  },
+  "keywords": [
+    "node"
+  ],
+  "license": "MIT"
+}
