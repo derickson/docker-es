@@ -1,3 +1,5 @@
 .env
 data
 elastic-internal-non_production.json
+certificates
+passwords.txt
