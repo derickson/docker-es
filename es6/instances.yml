@@ -1,0 +1,8 @@
+instances:
+  - name: "elasticsearch1"
+    dns:
+      - "elasticsearch1"
+      - "dockermachine"
+    ip:
+      - "172.18.10.2"
+      - "127.0.0.1"
