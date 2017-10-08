@@ -5,10 +5,10 @@
 #############################
 ES_VERSION="6.0.0-rc1"
 
-USERNAME="dave"
-USERPWD="dave123"
-USEREMAIL="dave@elastic.co"
-USERFULL="Dave Erickson"
+USERNAME="myusername"
+USERPWD="mypassword"
+USEREMAIL="myemail@mydomain.com"
+USERFULL="Full Name"
 
 LICENSE_FILE="elastic-internal-non_production.json"
 
