@@ -1,10 +1,26 @@
 # #!/bin/sh
 
+#############################
+### Settings
+#############################
 ES_VERSION="6.0.0-rc1"
+
+USERNAME="dave"
+USERPWD="dave123"
+USEREMAIL="dave@elastic.co"
+USERFULL="Dave Erickson"
+
+LICENSE_FILE="elastic-internal-non_production.json"
+
+
+
 CWD="$PWD"
 ES_DIR="/usr/share/elasticsearch"
 
 
+#############################
+### First time Setup
+#############################
 ENV_FILE_NAME=".env"
 if [ -f $ENV_FILE_NAME ]; then
 	echo "The .env file '$FILE' exists. Skipping Password Setup"
@@ -36,50 +52,58 @@ else
 	echo "Starting password setup"
 	#############################
 
-	# docker run --rm -d --name elasticsearch1 \
-	# 	-v "$CWD/data/es_s1:$ES_DIR/data" \
-	# 	-p "9200:9200" \
-	# 	"docker.elastic.co/elasticsearch/elasticsearch:$ES_VERSION"
 	docker-compose -f docker-compose-startup.yml up -d
 
-	echo "Waiting 30s for Elastic to startup ..."
-	sleep 30s
+	echo "Waiting 20s for Elastic to startup, setup-passwords only works on a running ES ..."
+	sleep 20s
 
 	docker exec elasticsearch1 bin/x-pack/setup-passwords auto --batch > passwords.txt
-
 
 	elasticpwd=$(grep -rhi 'PASSWORD elastic = ' passwords.txt | sed 's/PASSWORD elastic = //g')
 	kibanapwd=$(grep -rhi 'PASSWORD kibana = ' passwords.txt | sed 's/PASSWORD kibana = //g')
 	logstashpwd=$(grep -rhi 'PASSWORD logstash_system = ' passwords.txt | sed 's/PASSWORD logstash_system = //g')
 
-	# echo $elasticpwd
-	# echo $kibanapwd
-	# echo $logstashpwd
-
 	echo "ELASTIC_PWD=$elasticpwd" >> .env
 	echo "KIBANA_PWD=$kibanapwd" >> .env
 	echo "LOGSTASH_PWD=$logstashpwd" >> .env
 	rm passwords.txt
+	echo "passwords for built in users have been generated, can be found in .env file"
 
 
-	LICENSE_FILE="elastic-internal-non_production.json"
+	#############################
+	### Attempting license setup if license file exists
+	#############################
 	if [ -f $LICENSE_FILE ]; then
 		echo "applying license"
 		curl -XPUT  -u "elastic:$elasticpwd" 'http://dockermachine:9200/_xpack/license' -H "Content-Type: application/json" -d @$LICENSE_FILE
 	fi
 
+
+	#############################
+	### Installing named user
+	#############################
+	echo "creating starting named admin user"
+	echo '{
+	  "password" : "'$USERPWD'",
+	  "full_name" : "'$USERFULL'",
+	  "email" : "'$USEREMAIL'",
+	  "roles" : [ "superuser" ]
+	}' > user.json
+	curl -XPOST -u "elastic:$elasticpwd" "http://dockermachine:9200/_xpack/security/user/$USERNAME" -H "Content-Type: application/json" -d @user.json
+	rm user.json
+
+
+	#############################
+	### Shutting down first time run (as the ES instance is not started securely)
+	#############################
 	docker-compose -f docker-compose-startup.yml down
 
 fi
 
+#############################
+### Actual startup using secured ES and Kibana
+#############################
+
 echo "Starting Environment"
 docker-compose up -d
 
-
-# curl -XGET -u elastic -H "Content-Type: application/json" http://client:9200
-# curl -XGET -H "Content-Type: application/json" http://dockermachine:9200
-# curl -XGET -k -u "elastic" -H "Content-Type: application/json" https://elasticsearch1:9200
-# curl -XGET --cacert config/certificates/ca/ca.pem -u "kibana" -H "Content-Type: application/json" https://elasticsearch1:9200
-# curl -XGET -u "kibana" -H "Content-Type: application/json" http://elasticsearch1:9200
-# QsRW?G&Izw9fB$8lwGyF
-# cat /proc/1/environ

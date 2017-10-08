@@ -9,9 +9,9 @@ services:
       - node.name=elasticsearch1
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=true
       - "node.master=true"
       - "node.data=true"
+      - xpack.security.enabled=true
       - xpack.ssl.key=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.key
       - xpack.ssl.certificate=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.crt 
       - xpack.ssl.certificate_authorities=/usr/share/elasticsearch/config/x-pack/certificates/ca/ca.crt
@@ -35,11 +35,22 @@ services:
     ports:
       - 9200:9200
 
+
+## Notes.  
+##     Base image assumes security and monitoring are on
+##     each alternate docker has pre-built optimized modules in kibana for various parts being disabled
+##     this is important as otherwise each kibana boot will take many minutes
   kibana1:
     image: docker.elastic.co/kibana/kibana:6.0.0-rc1
+    # build: kibanacustom_no_monitor
+    # build: kibanacustom_no_sec_no_monitor
+    container_name: kibana1
     volumes:
-      # - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       - ./certificates:/usr/share/kibana/config/certificates
+      ## Note: if you are messing with kibana settings enough cause re-optimizations
+      ## it might make sense to mount a volume that surivives to container while experimenting
+      ## when done, cook into a custom Dockerfile like above
+      # - ./kibanaoptimize:/usr/share/kibana/optimize
     ports:
       - 5601:5601
     networks:
@@ -50,14 +61,16 @@ services:
       - SERVER_PORT=5601
       - SERVER_HOST="0"
       - SERVER_NAME="dockermachine"
-      - ELASTICSEARCH_URL=https://elasticsearch1:9200
+      - ELASTICSEARCH_URL=https://elasticsearch1:9200      
+      - XPACK_MONITORING_ENABLED=true
+      - XPACK_SECURITY_ENABLED=true
+      - XPACK_SECURITY_ENCRYPTIONKEY=something_at_least_32_characters_yo
       - ELASTICSEARCH_USERNAME=kibana
       - ELASTICSEARCH_PASSWORD=${KIBANA_PWD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certificates/ca/ca.pem
       - ELASTICSEARCH_SSL_VERIFICATIONMODE=full
-      - XPACK_SECURITY_ENABLED=true
-      - XPACK_MONITORING_ENABLED=false
-      - XPACK_SECURITY_ENCRYPTIONKEY=something_at_least_32_characters_yo
+      - SERVER_SSL_KEY=/usr/share/kibana/config/certificates/kibana1/kibana1.key
+      - SERVER_SSL_CERTIFICATE=/usr/share/kibana/config/certificates/kibana1/kibana1.crt
       
 
 networks:
