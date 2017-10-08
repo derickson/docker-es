@@ -1,8 +1,0 @@
-server.name: "dockermachine"
-server.port: 5601
-server.host: "0"
-elasticsearch.url: "https://elasticsearch1:9200"
-elasticsearch.username: "kibana"
-elasticsearch.ssl.certificateAuthorities: [ "/usr/share/kibana/config/certificates/ca/ca.pem" ]
-elasticsearch.ssl.verificationMode: full
-xpack.security.encryptionKey: "something_at_least_32_charactersxxx"

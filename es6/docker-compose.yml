@@ -38,7 +38,7 @@ services:
   kibana1:
     image: docker.elastic.co/kibana/kibana:6.0.0-rc1
     volumes:
-      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      # - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       - ./certificates:/usr/share/kibana/config/certificates
     ports:
       - 5601:5601
@@ -47,20 +47,17 @@ services:
     links:
       - "es_standalone:elasticsearch1"
     environment:
+      - SERVER_PORT=5601
+      - SERVER_HOST="0"
+      - SERVER_NAME="dockermachine"
+      - ELASTICSEARCH_URL=https://elasticsearch1:9200
+      - ELASTICSEARCH_USERNAME=kibana
       - ELASTICSEARCH_PASSWORD=${KIBANA_PWD}
-    
-    # environment:
-    #   - SERVER_PORT=5601
-    #   - SERVER_HOST="0"
-    #   - SERVER_NAME="dockermachine"
-    #   - ELASTICSEARCH_URL=https://elasticsearch1:9200
-    #   - ELASTICSEARCH.USERNAME=kibana
-    #   - "ELASTICSEARCH.PASSWORD=${KIBANA_PWD}"
-    #   - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certificates/ca/ca.pem
-    #   - ELASTICSEARCH_SSL_VERIFICATIONMODE=full
-    #   - XPACK_SECURITY_ENABLED=true
-    #   - XPACK_MONITORING_ENABLED=false
-    #   - XPACK_SECURITY_ENCRYPTIONKEY=something_at_least_32_characters_yo
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certificates/ca/ca.pem
+      - ELASTICSEARCH_SSL_VERIFICATIONMODE=full
+      - XPACK_SECURITY_ENABLED=true
+      - XPACK_MONITORING_ENABLED=false
+      - XPACK_SECURITY_ENCRYPTIONKEY=something_at_least_32_characters_yo
       
 
 networks:
