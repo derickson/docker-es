@@ -5,6 +5,8 @@ services:
     container_name: elasticsearch1
     image: docker.elastic.co/elasticsearch/elasticsearch-platinum:6.0.0-rc1
     environment:
+      - cluster.name=docker-cluster
+      - node.name=elasticsearch1
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=true
@@ -14,7 +16,7 @@ services:
       - xpack.ssl.certificate=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.crt 
       - xpack.ssl.certificate_authorities=/usr/share/elasticsearch/config/x-pack/certificates/ca/ca.crt
       - xpack.security.transport.ssl.enabled=true
-      - xpack.security.http.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=true
     networks:
       app-tls:
       internal-tls:
@@ -36,24 +38,29 @@ services:
   kibana1:
     image: docker.elastic.co/kibana/kibana:6.0.0-rc1
     volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       - ./certificates:/usr/share/kibana/config/certificates
     ports:
       - 5601:5601
     networks:
-      - app-tls
+      app-tls:
     links:
       - "es_standalone:elasticsearch1"
     environment:
-      - SERVER_PORT=5601
-      - SERVER_HOST="0"
-      - SERVER_NAME="dockermachine"
-      - ELASTICSEARCH_URL=http://elasticsearch1:9200
-      - elasticsearch.username=kibana
-      - "elasticsearch.password=${KIBANA_PWD}"
-      # - elasticsearch.ssl.certificateAuthorities=/usr/share/kibana/config/certificates/ca/ca.pem
-      - xpack.security.enabled=true
-      - xpack.monitoring.enabled=false
-      - xpack.security.encryptionKey=something_at_least_32_characters_yo
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PWD}
+    
+    # environment:
+    #   - SERVER_PORT=5601
+    #   - SERVER_HOST="0"
+    #   - SERVER_NAME="dockermachine"
+    #   - ELASTICSEARCH_URL=https://elasticsearch1:9200
+    #   - ELASTICSEARCH.USERNAME=kibana
+    #   - "ELASTICSEARCH.PASSWORD=${KIBANA_PWD}"
+    #   - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certificates/ca/ca.pem
+    #   - ELASTICSEARCH_SSL_VERIFICATIONMODE=full
+    #   - XPACK_SECURITY_ENABLED=true
+    #   - XPACK_MONITORING_ENABLED=false
+    #   - XPACK_SECURITY_ENCRYPTIONKEY=something_at_least_32_characters_yo
       
 
 networks:
