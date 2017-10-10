@@ -1,4 +1,4 @@
-# #!/bin/sh
+#!/bin/sh
 
 #############################
 ### Settings
@@ -9,6 +9,7 @@ USERNAME="myusername"
 USERPWD="mypassword"
 USEREMAIL="myemail@mydomain.com"
 USERFULL="Full Name"
+
 
 LICENSE_FILE="elastic-internal-non_production.json"
 
