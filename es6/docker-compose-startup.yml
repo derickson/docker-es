@@ -1,22 +1,23 @@
 version: '2'
 services:
   es_standalone:
-    # build: elasticsearch_custom
     container_name: elasticsearch1
-    image: docker.elastic.co/elasticsearch/elasticsearch-platinum:6.0.0-rc1
+    image: docker.elastic.co/elasticsearch/elasticsearch-platinum:6.0.0-rc2-SNAPSHOT
     environment:
+      - cluster.name=docker-cluster
+      - node.name=elasticsearch1
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - xpack.security.enabled=true
       - "node.master=true"
       - "node.data=true"
+      - xpack.security.enabled=true
       - xpack.ssl.key=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.key
       - xpack.ssl.certificate=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.crt 
       - xpack.ssl.certificate_authorities=/usr/share/elasticsearch/config/x-pack/certificates/ca/ca.crt
       - xpack.security.transport.ssl.enabled=true
-      ## THIS IS DISABLED SO setup-passwords can run in initial setup
-      - xpack.security.http.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=true
     networks:
+      app-tls:
       internal-tls:
         ipv4_address: 172.18.10.2
     ulimits:
@@ -33,9 +34,9 @@ services:
     ports:
       - 9200:9200
 
-
-
-networks:
+networks: 
+  app-tls:
+    driver: bridge
   internal-tls:
     driver: bridge
     ipam:
@@ -43,5 +44,3 @@ networks:
       config:
       - subnet: 172.18.10.0/24
         gateway: 172.18.10.1
-
-

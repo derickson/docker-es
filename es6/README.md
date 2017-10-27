@@ -12,6 +12,12 @@ sudo sysctl -w vm.max_map_count=262144
 ```
 
 
+This is currently using the RC2 snapshot build so run the following command to grab that
+
+```
+./pull-snapshots.sh
+```
+
 To Start (first run will do a bunch fo setup, taking a few minutes)
 
 * optionally put your Elastic X-Pack license (even the free one) in this folder
@@ -31,3 +37,7 @@ https://dockermachine:5601
 
 
 as I have my /etc/hosts file point dockermachine to the dockerhost
+
+
+Tear down the environment with ```./stop-and-clear.sh``` !!! will delete all data and certs !!!
+and stop the containers temporarily with ```./down.sh```

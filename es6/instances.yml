@@ -3,6 +3,7 @@ instances:
     dns:
       - "elasticsearch1"
       - "dockermachine"
+      - "localhost"
     ip:
       - "172.18.10.2"
       - "127.0.0.1"
@@ -10,6 +11,7 @@ instances:
     dns:
       - "kibana1"
       - "dockermachine"
+      - "localhost"
     ip:
       - "172.18.10.3"
       - "127.0.0.1"
