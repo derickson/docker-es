@@ -1,4 +1,4 @@
-## Elastic 6.0.0-rc1 Docker
+## Elastic 6.0.0-rc2 Docker
 
 Full TLS setup for Elastic and Kibana automated
 
