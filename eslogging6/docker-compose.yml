@@ -1,55 +1,95 @@
 version: '2'
 services:
-
-  ## Elasticsearch cluster (standalone)
-  ## persists data across container destruction in the ./data folder
-  ## make sure to set the docker host's (or docker-machine) vm.max_map_count
-  ## > docker-machine ssh default
-  ## > sudo vi /var/lib/boot2docker/profile
-  ## > # Add this line into the profile file
-  ## > sysctl -w vm.max_map_count=262144
   es_standalone:
-    extends:
-      file: es_common.yml
-      service: es_datamaster
+    container_name: elasticsearch1
+    image: docker.elastic.co/elasticsearch/elasticsearch-platinum:6.0.0-rc2-SNAPSHOT
     environment:
-      - node.name=es_standalone
-      - discovery.zen.minimum_master_nodes=1
+      - cluster.name=docker-cluster
+      - node.name=elasticsearch1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "node.master=true"
+      - "node.data=true"
+      - xpack.security.enabled=true
+      - xpack.ssl.key=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.key
+      - xpack.ssl.certificate=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.crt 
+      - xpack.ssl.certificate_authorities=/usr/share/elasticsearch/config/x-pack/certificates/ca/ca.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.http.ssl.enabled=true
+    networks:
+      app-tls:
+      internal-tls:
+        ipv4_address: 172.18.10.2
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    mem_limit: 1g
     volumes:
       - ./data/es_s1:/usr/share/elasticsearch/data
+      - ./certificates:/usr/share/elasticsearch/config/x-pack/certificates
     ports:
       - 9200:9200
 
-  # Kibana instance pointing at our standalone ES instance
+
+## Notes.  
+##     Base image assumes security and monitoring are on
+##     each alternate docker has pre-built optimized modules in kibana for various parts being disabled
+##     this is important as otherwise each kibana boot will take many minutes
   kibana1:
-    image: docker.elastic.co/kibana/kibana:6.0.0-beta1
+    image: docker.elastic.co/kibana/kibana:6.0.0-rc2-SNAPSHOT
+    # build: kibanacustom_no_monitor
+    # build: kibanacustom_no_sec_no_monitor
+    container_name: kibana1
+    volumes:
+      - ./certificates:/usr/share/kibana/config/certificates
+      ## Note: if you are messing with kibana settings enough cause re-optimizations
+      ## it might make sense to mount a volume that surivives to container while experimenting
+      ## when done, cook into a custom Dockerfile like above
+      # - ./kibanaoptimize:/usr/share/kibana/optimize
     ports:
       - 5601:5601
+    networks:
+      app-tls:
     links:
-      - "es_standalone:client"
+      - "es_standalone:elasticsearch1"
     environment:
       - SERVER_PORT=5601
       - SERVER_HOST="0"
       - SERVER_NAME="dockermachine"
-      - ELASTICSEARCH_URL=http://client:9200
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=changeme
-      - xpack.security.enabled=false
-
+      - ELASTICSEARCH_URL=https://elasticsearch1:9200      
+      - XPACK_MONITORING_ENABLED=true
+      - XPACK_SECURITY_ENABLED=true
+      - XPACK_SECURITY_ENCRYPTIONKEY=something_at_least_32_characters_yo
+      - ELASTICSEARCH_USERNAME=kibana
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PWD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certificates/ca/ca.pem
+      - ELASTICSEARCH_SSL_VERIFICATIONMODE=full
+      - SERVER_SSL_KEY=/usr/share/kibana/config/certificates/kibana1/kibana1.key
+      - SERVER_SSL_CERTIFICATE=/usr/share/kibana/config/certificates/kibana1/kibana1.crt
 
 
   # ## the logstash instance
   # ##   !!! You need to include absolute path to pipeline folder
   logstashprocessor:
-    image: docker.elastic.co/logstash/logstash:6.0.0-beta1
+    image: docker.elastic.co/logstash/logstash:6.0.0-rc2-SNAPSHOT
     links:
-      - es_standalone:elasticsearch
+      - "es_standalone:elasticsearch1"
     volumes:
+      - ./pipelines.yml:/usr/share/logstash/config/pipelines.yml
+      - ./logstash.yml:/usr/share/logstash/config/logstash.yml
       - /Users/dave/dev/github/docker-es/eslogging6/pipeline/:/usr/share/logstash/pipeline/
+      - ./certificates:/usr/share/logstash/config/certificates
+    networks:
+      app-tls:
     environment:
-      - DOCKERENV_ES_CONNECTION=elasticsearch:9200
+      - DOCKERENV_ES_CONNECTION=elasticsearch1:9200
       - DOCKERENV_ES_USER=elastic
-      - DOCKERENV_ES_PASSWORD=changeme
+      - DOCKERENV_ES_PASSWORD=${ELASTIC_PWD}
+      - DOCKERENV_CACERT=/usr/share/logstash/config/certificates/ca/ca.pem
 
   # ## a jekyll web server, you can git clone a local copy of my dev blog
   # ## > git clone https://github.com/derickson/jekyllexample.git
@@ -60,6 +100,8 @@ services:
     # image: jekyll/jekyll@sha256:715a814a1010cac95bb96ef0d06b824ae0317b7b2add0674f815a0e579a86374
     image: jekyll/jekyll:3.5
     command: jekyll serve
+    networks:
+      app-tls:
     ports: 
       - 4000:4000
     volumes: 
@@ -74,6 +116,8 @@ services:
       - 80:80
     volumes:
       - /var/log/apache2/
+    networks:
+      app-tls:
     links:
       - jekyll
     environment:
@@ -84,10 +128,27 @@ services:
     build: filebeat
     links:
       - logstashprocessor
+    networks:
+      app-tls:
     volumes_from:
       - proxy:ro
     environment:
       - DOCKERENV_FB_PATH_TO_LOG=/var/log/apache2/access.log
       - DOCKERENV_LOGSTASH_CONN=logstashprocessor:5044
+
+
+networks:
+  app-tls:
+    driver: bridge
+  internal-tls:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.18.10.0/24
+        gateway: 172.18.10.1
+
+
+
 
 

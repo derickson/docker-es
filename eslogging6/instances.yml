@@ -1,0 +1,17 @@
+instances:
+  - name: "elasticsearch1"
+    dns:
+      - "elasticsearch1"
+      - "dockermachine"
+      - "localhost"
+    ip:
+      - "172.18.10.2"
+      - "127.0.0.1"
+  - name: "kibana1"
+    dns:
+      - "kibana1"
+      - "dockermachine"
+      - "localhost"
+    ip:
+      - "172.18.10.3"
+      - "127.0.0.1"
