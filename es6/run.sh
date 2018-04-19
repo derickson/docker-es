@@ -3,7 +3,7 @@
 #############################
 ### Settings
 #############################
-ES_VERSION="6.0.0-rc2-SNAPSHOT"
+ES_VERSION="6.2.4"
 
 # USERNAME="myusername"
 # USERPWD="mypassword"
@@ -29,7 +29,7 @@ ES_DIR="/usr/share/elasticsearch"
 #############################
 ENV_FILE_NAME=".env"
 if [ -f $ENV_FILE_NAME ]; then
-	echo "The .env file '$FILE' exists. Skipping Password Setup"
+	echo "The .env file '$ENV_FILE_NAME' exists. Skipping Password Setup"
 else
 	echo "The .env file does not exist. "
 	
@@ -44,7 +44,7 @@ else
 	docker run -it --rm \
 	    -v "$CWD/certificates:$ES_DIR/config/x-pack/certificates" \
 	    -w $ES_DIR \
-	    "docker.elastic.co/elasticsearch/elasticsearch-platinum:6.0.0-rc2-SNAPSHOT" \
+	    "docker.elastic.co/elasticsearch/elasticsearch-platinum:$ES_VERSION" \
 	    bin/x-pack/certgen --silent \
 	    	--in $ES_DIR/config/x-pack/certificates/instances.yml \
 	    	--out $ES_DIR/config/x-pack/certificates/bundle.zip

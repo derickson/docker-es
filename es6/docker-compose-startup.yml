@@ -2,7 +2,7 @@ version: '2'
 services:
   es_standalone:
     container_name: elasticsearch1
-    image: docker.elastic.co/elasticsearch/elasticsearch-platinum:6.0.0-rc2-SNAPSHOT
+    image: docker.elastic.co/elasticsearch/elasticsearch-platinum:6.2.4
     environment:
       - cluster.name=docker-cluster
       - node.name=elasticsearch1
@@ -10,6 +10,7 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - "node.master=true"
       - "node.data=true"
+      - xpack.monitoring.enabled=false
       - xpack.security.enabled=true
       - xpack.ssl.key=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.key
       - xpack.ssl.certificate=/usr/share/elasticsearch/config/x-pack/certificates/elasticsearch1/elasticsearch1.crt 
