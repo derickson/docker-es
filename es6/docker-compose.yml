@@ -71,8 +71,7 @@ services:
       - ELASTICSEARCH_SSL_VERIFICATIONMODE=full
       - SERVER_SSL_KEY=/usr/share/kibana/config/certificates/kibana1/kibana1.key
       - SERVER_SSL_CERTIFICATE=/usr/share/kibana/config/certificates/kibana1/kibana1.crt
-      
-
+      - SERVER_SSL_ENABLED=true
 networks:
   app-tls:
     driver: bridge
