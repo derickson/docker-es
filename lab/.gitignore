@@ -1,0 +1,8 @@
+elastic-internal-production.json
+.env
+data
+kibanaoptimize
+elastic-internal-non_production.json
+certificates
+passwords.txt
+user.json
